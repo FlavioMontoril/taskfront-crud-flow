@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { TaskDto, TaskProps } from "../types/taskType";
+import { object } from "zod";
 
 
 const HOST = import.meta.env.VITE_HOST;
@@ -54,26 +55,39 @@ export const useApi = () => {
             deleteTask: async (id: string): Promise<{ status: number }> => {
                 try {
                     const { status } = await api.delete(`/v1/tasks/${id}`)
-                    return {status}
+                    return { status }
                 } catch (error) {
                     console.error(`Task not foud: ${error}`)
-                        throw new Error(`Não econtrado tarafa para deletar: ${error}`)
+                    throw new Error(`Não econtrado tarafa para deletar: ${error}`)
                 }
             }
         },
 
-        FileApi: {
-            getFileById: async (id: string): Promise<{status: number, data: Blob }> => {
-                try{
-                    const {status, data} = await api.get(`/v1/files/${id}`, {
-                        responseType: "blob"
-                    })
-                    return {status, data}
-                }catch(error){
-                     console.error(`File not foud: ${error}`)
-                        throw new Error(`Não econtrado arquivo: ${error}`)
+        fileApi: {
+            getFileById: async (taskId: string): Promise<{ status: number, url: string }> => {
+                try {
+                    const { status, data } = await api.get(`/v1/files/${taskId}`)
+                    // window.location.href = data.fileUrl
+                    return { status, url: data.fileUrl }
+                } catch (error) {
+                    console.error(`File not foud: ${error}`)
+                    throw new Error(`Não econtrado arquivo: ${error}`)
                 }
 
+            },
+            postFile: async (formData: FormData): Promise<{ status: number, data: string }> => {
+                try {
+                    const { status, data } = await api.post("/v1/files/", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+                    return { status, data }
+
+                } catch (error) {
+                    console.error(`File not foud: ${error}`)
+                    throw new Error(`Não econtrado arquivo: ${error}`)
+                }
             }
         }
     };
