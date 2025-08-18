@@ -17,6 +17,7 @@ import { TaskCardNode } from './nodes/TaskCardNode';
 import { X } from 'lucide-react';
 import { TaskDescriptionNode } from './nodes/TaskCardDescription';
 import { ButtonUploadTask } from './nodes/ButtonUploadTask';
+import { ButtonViewFile } from './nodes/ButtonViewTask';
 
 
 type FlowProps = {
@@ -27,7 +28,8 @@ type FlowProps = {
 const nodeTypes: NodeTypes = {
     taskCard: TaskCardNode,
     taskDescriptionCard: TaskDescriptionNode,
-    taskCreate: ButtonUploadTask,
+    fileUpload: ButtonUploadTask,
+    viewFile: ButtonViewFile
 };
 export function Flow({ task, onClose }: FlowProps) {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -63,11 +65,17 @@ export function Flow({ task, onClose }: FlowProps) {
                     },
                 },
                 {
-                    id: 'task-btn',
-                    type: 'taskCreate', // usa seu ButtonCreateTask
+                    id: 'upload-btn',
+                    type: 'fileUpload', // usa seu ButtonCreateTask
                     position: { x: 5, y: 400 },
-                    data: {},
+                    data: { id: task.getId() }
                 },
+                {
+                    id: 'view-btn',
+                    type: 'viewFile', // usa seu ButtonCreateTask
+                    position: { x: 500, y: 50 },
+                    data: { taskId: task.getId() }
+                }
             ];
 
         const newEdges = [
@@ -78,15 +86,22 @@ export function Flow({ task, onClose }: FlowProps) {
                 type: 'smoothstep', // ou 'straight' se quiser linha reta
                 animated: true,
             },
-              {
+            {
                 id: `edgebtn-${task.getId()}`,
-                source: 'task-btn',
+                source: 'upload-btn',
+                target: task.getId(),
+                type: 'smoothstep', // ou 'straight' se quiser linha reta
+                animated: true,
+            },
+              {
+                id: `edgeviewbtn-${task.getId()}`,
+                source: 'view-btn',
                 target: task.getId(),
                 type: 'smoothstep', // ou 'straight' se quiser linha reta
                 animated: true,
             }
         ];
-        
+
 
         setNodes(newNode);
         setEdges(newEdges); // limpa edges se necessário

@@ -1,12 +1,11 @@
 import { Handle, Position } from "reactflow";
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { TaskUploadFile } from "./UploadTaskForm";
+import { ViewFileNode } from "./ViewFileNode";
 
+export function ButtonViewFile({data}: any){
 
-export function ButtonUploadTask({data}: any){
-
-    console.log("Btton Data", data)
+    console.log("View Id Data", data)
 
     const [open, setIsOpen] = useState<boolean>(false)
 
@@ -21,11 +20,11 @@ export function ButtonUploadTask({data}: any){
         variant="secondary"
         onClick={() => handleOpenModal()}
         > 
-        Upload
+        View File
         </Button>
              {/* Connection handles */}
         {open && (
-            <TaskUploadFile taskId={data} isOpen={open} onClose={handleOpenModal}/>
+            <ViewFileNode data={data} isOpen={open} onClose={handleOpenModal}/>
         )}
                 <Handle id="right" type="target" position={Position.Right} />
                 <Handle id="left" type="source" position={Position.Left} />

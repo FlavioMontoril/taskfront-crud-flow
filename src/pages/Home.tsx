@@ -25,20 +25,21 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
 
-const getStatusColor = (status: TaskStatus | undefined) => {
-  switch (status) {
-    case TaskStatus.OPEN:
-      return "bg-gray-200 text-gray-600 border border-gray-300";
-    case TaskStatus.DONE:
-      return "bg-green-200 text-green-600 border border-green-300";
-    case TaskStatus.IN_PROGRESS:
-      return "bg-yellow-200 text-yellow-600 border border-yellow-300";
-    case TaskStatus.UNDER_REVIEW:
-      return "bg-blue-200 text-blue-600 border border-blue-300";
-    default:
-      return "bg-purple-200 text-purple-600 border border-purple-300";
-  }
-};
+
+  const getStatusColor = (status: TaskStatus | undefined) => {
+    switch (status) {
+      case TaskStatus.OPEN:
+        return "bg-gray-200 text-gray-600 border border-gray-300";
+      case TaskStatus.DONE:
+        return "bg-green-200 text-green-600 border border-green-300";
+      case TaskStatus.IN_PROGRESS:
+        return "bg-yellow-200 text-yellow-600 border border-yellow-300";
+      case TaskStatus.UNDER_REVIEW:
+        return "bg-blue-200 text-blue-600 border border-blue-300";
+      default:
+        return "bg-purple-200 text-purple-600 border border-purple-300";
+    }
+  };
 
   console.log("selecType ", selectType)
 
@@ -60,7 +61,7 @@ const getStatusColor = (status: TaskStatus | undefined) => {
   }, [])
 
   const filteredTask = () => {
-    const sortedTask = task.sort((a, b) => new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime())
+    const sortedTask = task?.sort((a, b) => new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime())
     if (filterTask.length > 3) {
       return sortedTask.filter((item) =>
         item.getReporter().toLocaleLowerCase().trim().includes(filterTask.toLocaleLowerCase().trim()) ||
@@ -189,8 +190,8 @@ const getStatusColor = (status: TaskStatus | undefined) => {
             </tr>
           </thead>
           <tbody>
-            {filteredTask().length > 0 ? (
-              filteredTask().map((item) => (
+            {filteredTask()?.length > 0 ? (
+              filteredTask()?.map((item) => (
                 <tr
                   key={item.getId()}
                   onClick={() => !selectionMode && onSelectTask(item)}
@@ -205,7 +206,7 @@ const getStatusColor = (status: TaskStatus | undefined) => {
                           toggleTaskSelection(item.getId())
                         }}
                       >
-                        {selectedTasks.has(item.getId()) ? <CheckSquare /> : <Square />}
+                        {selectedTasks?.has(item.getId()) ? <CheckSquare /> : <Square />}
                       </Button>
 
                     </td>
