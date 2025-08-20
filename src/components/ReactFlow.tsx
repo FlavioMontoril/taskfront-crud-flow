@@ -17,27 +17,31 @@ import { TaskCardNode } from './nodes/TaskCardNode';
 import { X } from 'lucide-react';
 import { TaskDescriptionNode } from './nodes/TaskCardDescription';
 import { ButtonUploadTask } from './nodes/ButtonUploadTask';
-import { ButtonViewFile } from './nodes/ButtonViewTask';
-
+import { FileDataNode } from './nodes/FileDataNodes';
+import type { FileResponse } from '../types/fileTypes';
 
 type FlowProps = {
     task: TaskModel;
     onClose: () => void;
+    data: FileResponse;
 };
 
 const nodeTypes: NodeTypes = {
     taskCard: TaskCardNode,
     taskDescriptionCard: TaskDescriptionNode,
     fileUpload: ButtonUploadTask,
-    viewFile: ButtonViewFile
+    fileData: FileDataNode,
 };
-export function Flow({ task, onClose }: FlowProps) {
+export function Flow({ task, onClose, data }: FlowProps) {
+
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
 
     const onConnect = useCallback((connection: Connection) => {
         return setEdges(edges => addEdge(connection, edges))
     }, [])
+
 
     // Atualiza o node sempre que task mudar
     useEffect(() => {
@@ -67,16 +71,25 @@ export function Flow({ task, onClose }: FlowProps) {
                 {
                     id: 'upload-btn',
                     type: 'fileUpload', // usa seu ButtonCreateTask
-                    position: { x: 5, y: 400 },
-                    data: { id: task.getId() }
+                    position: { x: 5, y: 30 },
+                    data: {taskId: task.getId() }
                 },
-                {
-                    id: 'view-btn',
-                    type: 'viewFile', // usa seu ButtonCreateTask
-                    position: { x: 500, y: 50 },
-                    data: { taskId: task.getId() }
-                }
             ];
+
+        if (data) {
+            newNode.push({
+                id: data?.file?.id,
+                type: 'fileData',
+                position: { x: 200, y: 400 },
+                data: {
+                    fileUrl: data?.fileUrl,
+                    original_name: data?.file?.original_name,
+                    file_path: data?.file?.file_path,
+                    taskId: task.getId(),
+                    createdAt: new Date(data?.file?.created_at ?? new Date()).toLocaleDateString('pt-BR'),
+                },
+            });
+        }
 
         const newEdges = [
             {
@@ -93,19 +106,22 @@ export function Flow({ task, onClose }: FlowProps) {
                 type: 'smoothstep', // ou 'straight' se quiser linha reta
                 animated: true,
             },
-              {
-                id: `edgeviewbtn-${task.getId()}`,
-                source: 'view-btn',
-                target: task.getId(),
-                type: 'smoothstep', // ou 'straight' se quiser linha reta
-                animated: true,
-            }
         ];
+
+        if (data) {
+            newEdges.push({
+                id: `edgefiledata-${data?.file?.id}`,
+                source: task.getId(),
+                target: data?.file?.id,
+                type: 'smoothstep',
+                animated: true,
+            });
+        }
 
 
         setNodes(newNode);
         setEdges(newEdges); // limpa edges se necessário
-    }, [task, setNodes, setEdges]);
+    }, [task, data, setNodes, setEdges]);
 
 
     return (

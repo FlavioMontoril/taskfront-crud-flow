@@ -11,11 +11,11 @@ export function TaskDownloadFile({ fileId, fileName }: TaskDownloadFileProps) {
 
   const handleDownload = async () => {
     try {
-      const { status, url } = await fileApi.getFileById(fileId);
+      const { status, data } = await fileApi.getFileById(fileId);
 
-      if (status === 200 && url) {
+      if (status === 200 && data.fileUrl) {
         // Inicia download abrindo a URL retornada pelo backend
-        window.location.href = url;
+        window.location.href = data.fileUrl;
       } else {
         toast.error("Arquivo não encontrado");
       }

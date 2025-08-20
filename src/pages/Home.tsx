@@ -10,14 +10,16 @@ import { AlertDialogDeleteTask } from "../components/DialogDeleteTask";
 import { TaskCreateModal } from "../components/nodes/TaskCreateModal";
 import { Button } from "../components/ui/button";
 import { TaskStatus, TaskType } from "../types/taskType";
+import type { FileResponse } from "../types/fileTypes";
 
 type TaskTableProps = {
   onSelectTask: (task: TaskModel) => void;
+  onSelectFile: (file: FileResponse) => void;
 };
 
-export function TaskTable({ onSelectTask }: TaskTableProps) {
-  const { taskApi } = useApi()
-  const { setTasks, task, setCurrentTaskId, currentTaskId } = useTaskStore()
+export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
+  const { taskApi, fileApi } = useApi()
+  const { setTasks, task, setCurrentTaskId, taskId } = useTaskStore()
   const [selectType, setSelectedType] = useState<"type" | TaskType>("type")
   const [open, setOpen] = useState<boolean>(false)
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -25,6 +27,9 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
 
+  console.log("TASKID", taskId)
+
+  const navigate = useNavigate()
 
   const getStatusColor = (status: TaskStatus | undefined) => {
     switch (status) {
@@ -41,14 +46,21 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
     }
   };
 
-  console.log("selecType ", selectType)
-
-
-  const navigate = useNavigate()
 
   const handleNavigateEditTask = (id: string) => {
     navigate(`task-update/${id}`)
   }
+
+  useEffect(() => {
+    async function fetchFileDownload(id: string) {
+
+      const { status, data } = await fileApi.getFileById(id)
+      if (status === 200 && data) {
+        onSelectFile(data)
+      }
+    }
+    fetchFileDownload(taskId)
+  }, [taskId])
 
   useEffect(() => {
     async function fetchTasks() {
@@ -59,6 +71,13 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
     }
     fetchTasks()
   }, [])
+
+  const handleSelectTask = (task: TaskModel) => {
+    setCurrentTaskId(task.getId())
+    onSelectTask(task)
+  }
+
+
 
   const filteredTask = () => {
     const sortedTask = task?.sort((a, b) => new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime())
@@ -84,6 +103,7 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
       newSelected.add(id)
     }
     setSelectedTasks(newSelected)
+    console.log(setSelectedTasks(newSelected))
   }
 
   const clearSelection = () => {
@@ -194,7 +214,12 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
               filteredTask()?.map((item) => (
                 <tr
                   key={item.getId()}
-                  onClick={() => !selectionMode && onSelectTask(item)}
+                  onClick={() => {
+                    if (!selectionMode) {
+                      handleSelectTask(item)
+                    }
+                  }
+                  }
                   className="h-16 cursor-pointer hover:bg-gray-100"
                 >
                   {selectionMode && (
@@ -238,7 +263,7 @@ export function TaskTable({ onSelectTask }: TaskTableProps) {
         {open && <TaskCreateModal isOpen={open} onClose={setOpen} />}
         {/* {open && <DialogCreateTask open={open} onOpenChange={setOpen} />} */}
         <AlertDialogDeleteTask
-          id={currentTaskId}
+          id={taskId}
           open={isOpen}
           onOpenChange={setIsOpen}
         />

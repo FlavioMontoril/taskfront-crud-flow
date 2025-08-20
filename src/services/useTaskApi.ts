@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { TaskDto, TaskProps } from "../types/taskType";
-import { object } from "zod";
+import type { FileResponse, UploadFileResponse } from "../types/fileTypes";
 
 
 const HOST = import.meta.env.VITE_HOST;
@@ -64,31 +64,30 @@ export const useApi = () => {
         },
 
         fileApi: {
-            getFileById: async (taskId: string): Promise<{ status: number, url: string }> => {
+            getFileById: async (id: string): Promise<{ status: number, data: FileResponse }> => {
                 try {
-                    const { status, data } = await api.get(`/v1/files/${taskId}`)
-                    // window.location.href = data.fileUrl
-                    return { status, url: data.fileUrl }
+                    const { status, data } = await api.get<FileResponse>(`/v1/files/${id}`)
+                    return { status, data }
                 } catch (error) {
                     console.error(`File not foud: ${error}`)
                     throw new Error(`Não econtrado arquivo: ${error}`)
                 }
 
             },
-            postFile: async (formData: FormData): Promise<{ status: number, data: string }> => {
-                try {
-                    const { status, data } = await api.post("/v1/files/", formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                        },
-                    });
-                    return { status, data }
+                postFile: async (formData: FormData): Promise<{ status: number, data: UploadFileResponse}> => {
+                    try {
+                        const { status, data } = await api.post<UploadFileResponse>("/v1/files/", formData, {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                        });
+                        return { status, data }
 
-                } catch (error) {
-                    console.error(`File not foud: ${error}`)
-                    throw new Error(`Não econtrado arquivo: ${error}`)
+                    } catch (error) {
+                        console.error(`File not foud: ${error}`)
+                        throw new Error(`Não econtrado arquivo: ${error}`)
+                    }
                 }
-            }
         }
     };
 };

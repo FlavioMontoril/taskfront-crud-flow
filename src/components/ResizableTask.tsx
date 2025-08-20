@@ -4,12 +4,15 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resiz
 import type { TaskModel } from "../model/taskModel";
 import { ReactFlowProvider } from "reactflow";
 import { TaskTable } from "../pages/Home";
+import type { FileResponse } from "../types/fileTypes";
 
 
 
 export function ResizableTask() {
     const [selectedTask, setSelectedTask] = useState<TaskModel | null>(null);
-    
+    const [selectedFile, setSelectedFile] = useState<FileResponse | null>(null);
+
+
     return (
         <ReactFlowProvider>
             <ResizablePanelGroup
@@ -17,14 +20,14 @@ export function ResizableTask() {
                 className="min-h-[200px] rounded-lg border md:min-w-[1000px] border-none"
             >
                 <ResizablePanel defaultSize={selectedTask ? 20 : 100} className="px-2">
-                    <TaskTable onSelectTask={setSelectedTask} />
+                    <TaskTable onSelectTask={setSelectedTask} onSelectFile={setSelectedFile} />
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 {selectedTask && (
-                    
+
                     <ResizablePanel defaultSize={80} className="py-6">
                         <div className="flex h-full  items-center justify-center p-6">
-                            <Flow task={selectedTask} onClose={() => setSelectedTask(null)} />
+                            <Flow task={selectedTask} data={selectedFile!} onClose={() => setSelectedTask(null)}  />
                         </div>
                     </ResizablePanel>
                 )}

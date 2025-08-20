@@ -4,13 +4,13 @@ import { TaskModel } from "../model/taskModel";
 
 interface TaskStoreProps {
     task: TaskModel[],
-    currentTaskId: string;
+    taskId: string;
     setTasks: (task: TaskProps[] | null) => void,
     addTask: (task: TaskProps) => void,
     updateTask: (id: string, task: TaskProps) => void
     deleteTask: (id: string)=>void
     findOneTask: (id: string) => TaskModel | null;
-    setCurrentTaskId:(currentTaskId: string)=>void
+    setCurrentTaskId:(taskId: string)=>void
 }
 
 export const useTaskStore = create<TaskStoreProps>((set, get) => {
@@ -39,13 +39,13 @@ export const useTaskStore = create<TaskStoreProps>((set, get) => {
         return get().task?.find(item => item.getId() === id) || null
     }
     function handleSetCurrentTaskId(id: string) {
-        set(()=> ({currentTaskId: id}))
+        set(()=> ({taskId: id}))
     }
 
 
     return {
         task: [],
-        currentTaskId: "",
+        taskId: "",
         setTasks: handleSetTasks,
         addTask: handleAddTask,
         updateTask: handleUpdateTask,

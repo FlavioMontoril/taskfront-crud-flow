@@ -1,4 +1,3 @@
-// import { useRef } from "react";
 import ReactDOM from "react-dom";
 import { X } from "lucide-react";
 import { useApi } from "../../services/useTaskApi";
@@ -6,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { uploadFileSchema, type UploadFileSchema } from "../../validators/uploadFileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useFileStore } from "../../store/file-store";
 
 interface TaskUploadFileProps {
   isOpen: boolean;
@@ -14,8 +14,9 @@ interface TaskUploadFileProps {
 }
 
 export function TaskUploadFile({ isOpen, onClose, taskId }: TaskUploadFileProps) {
-  // const fileInputRef = useRef<HTMLInputElement>(null);
   const { fileApi } = useApi()
+  const {addFile} = useFileStore()
+
 
   const { register, handleSubmit, formState: { errors }, } = useForm<UploadFileSchema>({
     resolver: zodResolver(uploadFileSchema),
@@ -37,7 +38,7 @@ export function TaskUploadFile({ isOpen, onClose, taskId }: TaskUploadFileProps)
     formData.append("taskId", taskId)
     const { status, data: _data } = await fileApi.postFile(formData)
     if (status === 201 && _data) {
-
+      addFile(_data.file, _data.message)
       toast.success("Arquivo enviado com sucesso")
       onClose();
     }
