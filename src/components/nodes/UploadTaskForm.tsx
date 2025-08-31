@@ -26,7 +26,6 @@ export function TaskUploadFile({ isOpen, onClose, taskId }: TaskUploadFileProps)
   })
 
   async function onSubmit(data: UploadFileSchema) {
-    console.log("Disparou", data)
     const file = data.file?.[0];
     if (!file) {
       toast.error("Selecione um arquivo");

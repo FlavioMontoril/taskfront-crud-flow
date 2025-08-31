@@ -19,15 +19,14 @@ type TaskTableProps = {
 
 export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
   const { taskApi, fileApi } = useApi()
-  const { setTasks, task, setCurrentTaskId, taskId } = useTaskStore()
+  const { setTasks, taskList, setCurrentTaskId, taskId } = useTaskStore()
+
   const [selectType, setSelectedType] = useState<"type" | TaskType>("type")
   const [open, setOpen] = useState<boolean>(false)
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filterTask, setFilterTask] = useState<string>("")
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
-
-  console.log("TASKID", taskId)
 
   const navigate = useNavigate()
 
@@ -48,18 +47,19 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
 
 
   const handleNavigateEditTask = (id: string) => {
+    setCurrentTaskId(id)
     navigate(`task-update/${id}`)
   }
 
   useEffect(() => {
-    async function fetchFileDownload(id: string) {
 
+    async function fetchFileDownload(id: string) {
       const { status, data } = await fileApi.getFileById(id)
       if (status === 200 && data) {
         onSelectFile(data)
       }
     }
-    fetchFileDownload(taskId)
+    fetchFileDownload(taskId!)
   }, [taskId])
 
   useEffect(() => {
@@ -80,18 +80,18 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
 
 
   const filteredTask = () => {
-    const sortedTask = task?.sort((a, b) => new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime())
+    const sortedTask = taskList?.sort((a, b) => new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime())
     if (filterTask.length > 3) {
       return sortedTask.filter((item) =>
         item.getReporter().toLocaleLowerCase().trim().includes(filterTask.toLocaleLowerCase().trim()) ||
         item.getSummary().toLocaleLowerCase().trim().includes(filterTask.toLocaleLowerCase().trim()))
     }
-    const filterType = selectType === "type" ? task : task.filter(item => item.getType() === selectType as TaskType)
+    const filterType = selectType === "type" ? taskList : taskList.filter(item => item.getType() === selectType as TaskType)
 
     if (selectType) {
       return filterType
     }
-    return task
+    return taskList
   }
 
 
@@ -103,7 +103,6 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
       newSelected.add(id)
     }
     setSelectedTasks(newSelected)
-    console.log(setSelectedTasks(newSelected))
   }
 
   const clearSelection = () => {
@@ -113,7 +112,6 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
 
   const handleDeleteTasks = (id: string) => {
     setCurrentTaskId(id)
-    console.log("ID", id)
     setIsOpen(true)
     clearSelection()
   }
@@ -170,6 +168,9 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
         </div>
       )}
 
+          <div>
+            {`Total de: ${taskList.length} ${taskList.length >1 ? "taks" : "task"}` }
+          </div>
       <div className="w-full bg-white rounded-sm h-11 border border-gray-200 mb-3 flex justify-between">
         <div className="relative">
           <Search className="mt-3 absolute left-3" size={18} color="gray" />
@@ -220,7 +221,7 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
                     }
                   }
                   }
-                  className="h-16 cursor-pointer hover:bg-gray-100"
+                  className={`${taskId === item.getId() ? "border-l-4 border-l-blue-300" : "border-l-0"} ? h-16 cursor-pointer border-t-2 hover:bg-gray-50`}
                 >
                   {selectionMode && (
                     <td className="px-4 py-2 text-center">
@@ -263,7 +264,7 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
         {open && <TaskCreateModal isOpen={open} onClose={setOpen} />}
         {/* {open && <DialogCreateTask open={open} onOpenChange={setOpen} />} */}
         <AlertDialogDeleteTask
-          id={taskId}
+          id={taskId!}
           open={isOpen}
           onOpenChange={setIsOpen}
         />

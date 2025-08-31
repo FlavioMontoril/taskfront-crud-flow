@@ -6,8 +6,6 @@ import { TaskUploadFile } from "./UploadTaskForm";
 
 export function ButtonUploadTask({data}: any){
 
-    console.log("Btton Data", data)
-
     const [open, setIsOpen] = useState<boolean>(false)
 
     const handleOpenModal = () => {
