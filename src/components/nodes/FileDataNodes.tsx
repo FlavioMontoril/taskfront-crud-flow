@@ -9,7 +9,6 @@ interface FileDataProps {
 }
 
 export function FileDataNode({ data }: FileDataProps) {
-console.log("TATA", data)
 
     const [isOpen, setIsOpen] = useState(false)
 

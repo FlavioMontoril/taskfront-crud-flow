@@ -11,18 +11,16 @@ interface AlertDialogProps {
 
 export function AlertDialogDeleteTask({ open, onOpenChange, id }: AlertDialogProps) {
   const { taskApi } = useApi()
-  const { deleteTask } = useTaskStore()
+  const { deleteTask, setCurrentTaskId } = useTaskStore()
   const navigate = useNavigate()
-
-  console.log("ID", id)
 
   if (!open) return null;
 
   async function handleDeleteTask() {
-    console.log("Chegou aqui ?")
     const { status } = await taskApi.deleteTask(id)
     if (status === 204) {
       deleteTask(id)
+      setCurrentTaskId(null)
       toast.success(`Tarefa excluida: ${id}`)
       navigate("/")
       onOpenChange(false)

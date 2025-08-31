@@ -24,7 +24,7 @@ export const useApi = () => {
                     throw new Error(`Tarefa não encontrada: ${error}`)
                 }
             },
-            findOneTask: async (id: string): Promise<{ status: number, data: TaskProps }> => {
+            getTaskById: async (id: string): Promise<{ status: number, data: TaskProps }> => {
                 try {
                     const { status, data } = await api.get(`/v1/tasks/${id}`)
                     return { status, data }
