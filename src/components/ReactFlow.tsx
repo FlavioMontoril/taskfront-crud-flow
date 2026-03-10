@@ -18,12 +18,12 @@ import { X } from 'lucide-react';
 import { TaskDescriptionNode } from './nodes/TaskCardDescription';
 import { ButtonUploadTask } from './nodes/ButtonUploadTask';
 import { FileDataNode } from './nodes/FileDataNodes';
-import type { FileResponse } from '../types/fileTypes';
+import type { UploadFileResponse } from '../types/fileTypes';
 
 type FlowProps = {
     task: TaskModel;
     onClose: () => void;
-    data: FileResponse;
+    data: UploadFileResponse;
 };
 
 const nodeTypes: NodeTypes = {
@@ -33,6 +33,8 @@ const nodeTypes: NodeTypes = {
     fileData: FileDataNode,
 };
 export function Flow({ task, onClose, data }: FlowProps) {
+
+    console.log("Data", data)
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -82,11 +84,11 @@ export function Flow({ task, onClose, data }: FlowProps) {
                 type: 'fileData',
                 position: { x: 200, y: 400 },
                 data: {
-                    fileUrl: data?.fileUrl,
+                    // fileUrl: data?.fileUrl,
                     original_name: data?.file?.original_name,
                     file_path: data?.file?.file_path,
                     taskId: task.getId(),
-                    createdAt: new Date(data?.file?.created_at ?? new Date()).toLocaleDateString('pt-BR'),
+                    createdAt: new Date(data?.file?.createdAt ?? new Date()).toLocaleDateString('pt-BR'),
                 },
             });
         }

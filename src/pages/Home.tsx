@@ -9,21 +9,14 @@ import { RiCheckboxMultipleBlankLine, RiCheckboxMultipleLine } from "react-icons
 import { AlertDialogDeleteTask } from "../components/DialogDeleteTask";
 import { TaskCreateModal } from "../components/nodes/TaskCreateModal";
 import { Button } from "../components/ui/button";
-import { TaskStatus, TaskType } from "../types/taskType";
-import type { FileResponse } from "../types/fileTypes";
+import { TaskStatus, type TaskProps } from "../types/taskType";
+// import { useFileStore } from "../store/file-store";
 
-type TaskTableProps = {
-  onSelectTask: (task: TaskModel) => void;
-  onSelectFile: (file: FileResponse) => void;
-};
-
-export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
-  const { taskApi, fileApi } = useApi()
-  const { setTasks, taskList, setCurrentTaskId, taskId } = useTaskStore()
-
-  const [selectType, setSelectedType] = useState<"type" | TaskType>("type")
-  const [open, setOpen] = useState<boolean>(false)
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+export function TaskTable() {
+  const { taskApi } = useApi()
+  const { setTasks, taskList, setCurrentTaskId, taskId, setOpenModal, isOpenDialogDelete, isOpenModalCreateTask, setTask } = useTaskStore()
+  // const { addDownload } = useFileStore()
+  // const [selectType, setSelectedType] = useState<"type" | TaskType>("type")
   const [filterTask, setFilterTask] = useState<string>("")
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
@@ -51,22 +44,26 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
     navigate(`task-update/${id}`)
   }
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    async function fetchFileDownload(id: string) {
-      const { status, data } = await fileApi.getFileById(id)
-      if (status === 200 && data) {
-        onSelectFile(data)
-      }
-    }
-    fetchFileDownload(taskId!)
-  }, [taskId])
+  //   async function fetchFileDownload(id: string) {
+  //     const response = await fileApi.getFileById(id)
+  //     if (status === 200 && data) {
+
+  //       console.log('File', data)
+  //       addDownload(data)
+  //     }
+  //   }
+  //   if (taskId)
+  //     fetchFileDownload(taskId)
+  // }, [taskId])
 
   useEffect(() => {
     async function fetchTasks() {
-      const { status, data } = await taskApi.getAllTasks()
-      if (status === 200 && data) {
-        setTasks(data)
+
+      const response = await taskApi.getAllTasks()
+      if (response) {
+        setTasks(response)
       }
     }
     fetchTasks()
@@ -74,23 +71,23 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
 
   const handleSelectTask = (task: TaskModel) => {
     setCurrentTaskId(task.getId())
-    onSelectTask(task)
+    setTask(task as unknown as TaskProps)
+    setOpenModal("flow", true)
   }
-
 
 
   const filteredTask = () => {
     const sortedTask = taskList?.sort((a, b) => new Date(b.getCreatedAt()).getTime() - new Date(a.getCreatedAt()).getTime())
     if (filterTask.length > 3) {
       return sortedTask.filter((item) =>
-        item.getReporter().toLocaleLowerCase().trim().includes(filterTask.toLocaleLowerCase().trim()) ||
+        item.getReporterId().toLocaleLowerCase().trim().includes(filterTask.toLocaleLowerCase().trim()) ||
         item.getSummary().toLocaleLowerCase().trim().includes(filterTask.toLocaleLowerCase().trim()))
     }
-    const filterType = selectType === "type" ? taskList : taskList.filter(item => item.getType() === selectType as TaskType)
+    // const filterType = selectType === "type" ? taskList : taskList.filter(item => item.getType() === selectType as TaskType)
 
-    if (selectType) {
-      return filterType
-    }
+    // if (selectType) {
+    //   return filterType
+    // }
     return taskList
   }
 
@@ -112,7 +109,7 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
 
   const handleDeleteTasks = (id: string) => {
     setCurrentTaskId(id)
-    setIsOpen(true)
+    setOpenModal("delete", true)
     clearSelection()
   }
 
@@ -120,7 +117,7 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
     <div className="w-full h-[500px]">
       <div className="flex justify-end mb-6 gap-2">
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => setOpenModal("create", true)}
           className="bg-white rounded-md border border-gray-300 shadow-sm w-24"
         >
           Create Task
@@ -168,16 +165,17 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
         </div>
       )}
 
-          <div>
-            {`Total de: ${taskList.length} ${taskList.length >1 ? "taks" : "task"}` }
-          </div>
+      <div>
+        {`Total de: ${taskList.length} ${taskList.length > 1 ? "taks" : "task"}`}
+      </div>
       <div className="w-full bg-white rounded-sm h-11 border border-gray-200 mb-3 flex justify-between">
         <div className="relative">
           <Search className="mt-3 absolute left-3" size={18} color="gray" />
           <Input
+            name="search"
             value={filterTask}
             placeholder="Pesquise tarefa por responsável ou resumo..."
-            className="w-[300%] items-center h-7 m-auto ml-2 pl-7 mt-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            className="w-[160%] items-center h-7 m-auto ml-2 pl-7 mt-2 focus:outline-none focus:ring-2 focus:ring-gray-300"
             onChange={(e) => setFilterTask(e.target.value)}
           />
         </div>
@@ -188,26 +186,25 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
           <thead className="sticky top-0 bg-white z-10 shadow">
             <tr>
               {selectionMode && <th className="px-4 py-2"></th>}
-              <th className="px-4 py-2 text-left">Reporter</th>
-              <th className="px-4 py-2 text-left">Assignee</th>
+              <th className="px-4 py-2 text-left">Code</th>
               <th className="px-4 py-2 text-left">Summary</th>
-              <tr>
-                <th>
-                  <select className=" px-0 py-2 text-left font-bold cursor-pointer"
-                    title="Filtrar todos os tipos"
-                    value={selectType}
-                    onChange={(e) => setSelectedType(e.target.value as "type" | TaskType)}
-                  >
-                    <option value="type">Type</option>
-                    <option value={TaskType.BUG}>Bug</option>
-                    <option value={TaskType.EPIC}>Epic</option>
-                    <option value={TaskType.SUB_TASK}>Sub_Task</option>
-                    <option value={TaskType.TASK}>Task</option>
-                  </select>
-                </th>
-              </tr>
-              <th className="px-4 py-2 text-left">Criado em</th>
+              <th className="px-4 py-2 text-left">Type</th>
+
+              {/* <th>
+                <select className=" px-0 py-2 text-left font-bold cursor-pointer"
+                  title="Filtrar todos os tipos"
+                  value={selectType}
+                  onChange={(e) => setSelectedType(e.target.value as "type" | TaskType)}
+                >
+                  <option value="type">Type</option>
+                  <option value={TaskType.BUG}>Bug</option>
+                  <option value={TaskType.EPIC}>Epic</option>
+                  <option value={TaskType.SUB_TASK}>Sub_Task</option>
+                  <option value={TaskType.TASK}>Task</option>
+                </select>
+              </th> */}
               <th className="px-4 py-2 text-left">Status</th>
+              <th className="px-4 py-2 text-left">Criado em</th>
             </tr>
           </thead>
           <tbody>
@@ -237,17 +234,16 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
 
                     </td>
                   )}
-                  <td className="font-bold px-4 py-2">{item.getReporter()}</td>
-                  <td className="font-bold px-4 py-2">{item.getAssignee()}</td>
+                  <td className="font-bold px-4 py-2">{item.getCode()}</td>
                   <td className="px-4 py-2">{item.getSummary()}</td>
                   <td className="px-4 py-2">{item.getType()}</td>
-                  <td className="px-4 py-2">
-                    {new Date(item.getCreatedAt()).toLocaleDateString("pt-BR")}
-                  </td>
                   <td className="px-4 py-2">
                     <div className={`max-w-max px-3 rounded-full ${getStatusColor(item.getStatus())}`}>
                       {item.getStatus()}
                     </div>
+                  </td>
+                  <td className="px-4 py-2">
+                    {new Date(item.getCreatedAt()).toLocaleDateString("pt-BR")}
                   </td>
                 </tr>
 
@@ -261,13 +257,8 @@ export function TaskTable({ onSelectTask, onSelectFile }: TaskTableProps) {
             )}
           </tbody>
         </table>
-        {open && <TaskCreateModal isOpen={open} onClose={setOpen} />}
-        {/* {open && <DialogCreateTask open={open} onOpenChange={setOpen} />} */}
-        <AlertDialogDeleteTask
-          id={taskId!}
-          open={isOpen}
-          onOpenChange={setIsOpen}
-        />
+        {isOpenModalCreateTask && <TaskCreateModal />}
+        {isOpenDialogDelete && <AlertDialogDeleteTask />}
 
       </div>
     </div>

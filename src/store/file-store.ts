@@ -1,68 +1,23 @@
 
-// import { create } from "zustand";
-// import type { FileResponse } from "../types/fileTypes";
-
-// interface FileStoreProps {
-//     file: FileResponse | null;
-//     addFile: (file: FileResponse, message: string) => void;
-// }
-
-// export const useFileStore = create<FileStoreProps>((set) => {
-
-//     function handleAddFile(file: FileResponse, message: string){
-//         set(()=> ({file: file, message}))
-//     }
-
-//     return {
-//         file: null,
-//         addFile: handleAddFile,
-//     }
-// })
-
-// import { create } from "zustand";
-// import { persist } from "zustand/middleware";
-// import type { FileUploadResponse } from "../types/fileTypes";
-
-// interface FileStoreProps {
-//     file: FileUploadResponse | null;
-//     message: string | null;
-//     fileUrl: string | null;
-//     addFile: (file: FileUploadResponse, message: string) => void;
-//     addFileUrl: (fileUrl: string) => void;
-// }
-
-// export const useFileStore = create<FileStoreProps>()(
-//     persist(
-//         (set) => ({
-//             file: null,
-//             message: null,
-//              fileUrl: null,
-//             addFile: (file: FileUploadResponse, message: string) =>
-//                 set(() => ({ file, message })),
-//             addFileUrl: (fileUrl: string)=>
-//                 set(()=>({fileUrl})),
-//         }),
-//         {
-//             name: "file-storage", // chave do localStorage
-//         }
-//     )
-// );
-
 import { create } from "zustand";
-import type {  FileUploadResponse } from "../types/fileTypes";
+import type { FileResponse, UploadFileResponse } from "../types/fileTypes";
 
 interface FileStoreProps {
-  file: FileUploadResponse | null;
-  message: string | null;
+  upload: UploadFileResponse | null;
   fileUrl: string | null;
-  addFile: (file: FileUploadResponse, message: string) => void;
+  download: FileResponse | null
+  addUpload: (data: UploadFileResponse) => void;
   addFileUrl: (fileUrl: string) => void;
+  addDownload: (data: FileResponse)=>void
+  // addDataFile: (data: FileResponse) => void
 }
 
 export const useFileStore = create<FileStoreProps>((set) => ({
-  file: null,
-  message: null,
+  upload: null,
   fileUrl: null,
-  addFile: (file: FileUploadResponse, message: string) => set({ file, message }),
+  download: null,
+  addUpload: (upload: UploadFileResponse) => set({ upload }),
   addFileUrl: (fileUrl: string) => set({ fileUrl }),
+  addDownload: (download: FileResponse)=> set({download})
+  // addDataFile: (data: FileResponse) => set({ data })
 }));
