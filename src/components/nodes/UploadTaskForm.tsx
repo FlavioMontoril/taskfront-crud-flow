@@ -15,10 +15,10 @@ interface TaskUploadFileProps {
 
 export function TaskUploadFile({ isOpen, onClose, taskId }: TaskUploadFileProps) {
   const { fileApi } = useApi()
-  const {addFile} = useFileStore()
+  const { addUpload } = useFileStore()
 
 
-  const { register, handleSubmit, formState: { errors }, } = useForm<UploadFileSchema>({
+  const { register, handleSubmit } = useForm<UploadFileSchema>({
     resolver: zodResolver(uploadFileSchema),
     defaultValues: {
       file: undefined,
@@ -35,9 +35,12 @@ export function TaskUploadFile({ isOpen, onClose, taskId }: TaskUploadFileProps)
     const formData = new FormData()
     formData.append("file", file)
     formData.append("taskId", taskId)
+
     const { status, data: _data } = await fileApi.postFile(formData)
+
     if (status === 201 && _data) {
-      addFile(_data.file, _data.message)
+      console.log("File Upload", _data)
+      addUpload(_data)
       toast.success("Arquivo enviado com sucesso")
       onClose();
     }

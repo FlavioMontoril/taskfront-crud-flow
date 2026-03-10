@@ -3,8 +3,11 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { TaskUploadFile } from "./UploadTaskForm";
 
+type ButtonUploadProps = {
+    data: string
+}
 
-export function ButtonUploadTask({data}: any){
+export function ButtonUploadTask({ data }: ButtonUploadProps) {
 
     const [open, setIsOpen] = useState<boolean>(false)
 
@@ -12,21 +15,21 @@ export function ButtonUploadTask({data}: any){
         setIsOpen(prev => !prev)
     }
 
-    return(
+    return (
         <div>
-        <Button
-        className="bg-white shadow"
-        variant="secondary"
-        onClick={() => handleOpenModal()}
-        > 
-        Upload
-        </Button>
-             {/* Connection handles */}
-        {open && (
-            <TaskUploadFile taskId={data} isOpen={open} onClose={handleOpenModal}/>
-        )}
-                <Handle id="right" type="target" position={Position.Right} />
-                <Handle id="left" type="source" position={Position.Left} />
+            <Button
+                className="bg-white shadow"
+                variant="secondary"
+                onClick={() => handleOpenModal()}
+            >
+                Upload
+            </Button>
+            {/* Connection handles */}
+            {open && (
+                <TaskUploadFile taskId={data} isOpen={open} onClose={handleOpenModal} />
+            )}
+            <Handle id="right" type="target" position={Position.Right} />
+            <Handle id="left" type="source" position={Position.Left} />
         </div>
     )
 }

@@ -6,13 +6,17 @@ interface TaskStoreProps {
     taskList: TaskModel[]
     taskId: string | null
     task: TaskModel | null
+    isOpenDialogDelete: boolean
+    isOpenModalCreateTask: boolean
+    isOpenFlow: boolean
     setTask: (task: TaskProps | null) => void
     setTasks: (task: TaskProps[] | null) => void
     addTask: (task: TaskProps | null) => void
-    updateTask: (id: string, task: TaskProps) => void
+    updateTask: (task: TaskProps) => void
     deleteTask: (id: string) => void
     findOneTask: (id: string) => TaskModel | null
     setCurrentTaskId: (taskId: string | null) => void
+    setOpenModal: (mode: "delete" | "create" | "flow", open: boolean) => void
 }
 
 export const useTaskStore = create<TaskStoreProps>((set, get) => {
@@ -32,11 +36,28 @@ export const useTaskStore = create<TaskStoreProps>((set, get) => {
         set(() => ({ task: newTask }))
     }
 
-    function handleUpdateTask(id: string, task: TaskProps) {
-        const newUpdate = TaskModel.build(task)
-        set((state) => ({
-            taskList: state.taskList?.map(item => item.getId() === id ? newUpdate : item) || []
-        }))
+    function handleUpdateTask(task: TaskProps) {
+        const newTask = TaskModel.build(task);
+
+        set((state) => {
+            const exists = state.taskList?.some(
+                (item) => item.getId() === newTask.getId()
+            );
+
+            if (exists) {
+                return {
+                    taskList: state.taskList!.map((item) =>
+                        item.getId() === newTask.getId() ? newTask : item
+                    ),
+                };
+            }
+
+            return {
+                taskList: state.taskList
+                    ? [...state.taskList, newTask]
+                    : [newTask],
+            };
+        });
     }
 
     function handleDeleteTask(id: string) {
@@ -46,9 +67,21 @@ export const useTaskStore = create<TaskStoreProps>((set, get) => {
     function handleFindOneTask(id: string): TaskModel | null {
         return get().taskList?.find(item => item.getId() === id) || null
     }
-    
+
     function handleSetCurrentTaskId(id: string | null) {
         set(() => ({ taskId: id }))
+    }
+
+    function handleSetOpenModal(mode: "create" | "delete" | "flow", open: boolean) {
+        set((state) => {
+            if (mode === "create") {
+                return { isOpenModalCreateTask: open ?? !state.isOpenModalCreateTask }
+            }
+            if (mode === "delete") {
+                return { isOpenDialogDelete: open ?? !state.isOpenDialogDelete }
+            }
+            return { isOpenFlow: open ?? !state.isOpenFlow }
+        })
     }
 
 
@@ -56,6 +89,9 @@ export const useTaskStore = create<TaskStoreProps>((set, get) => {
         taskList: [],
         taskId: null,
         task: null,
+        isOpenDialogDelete: false,
+        isOpenModalCreateTask: false,
+        isOpenFlow: false,
         setTask: handleSetTask,
         setTasks: handleSetTasks,
         addTask: handleAddTask,
@@ -63,5 +99,6 @@ export const useTaskStore = create<TaskStoreProps>((set, get) => {
         findOneTask: handleFindOneTask,
         deleteTask: handleDeleteTask,
         setCurrentTaskId: handleSetCurrentTaskId,
+        setOpenModal: handleSetOpenModal,
     }
 })

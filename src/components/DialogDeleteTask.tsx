@@ -3,29 +3,24 @@ import { useApi } from "../services/useTaskApi";
 import { useTaskStore } from "../store/task-store";
 import { useNavigate } from "react-router-dom";
 
-interface AlertDialogProps {
-  id: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
 
-export function AlertDialogDeleteTask({ open, onOpenChange, id }: AlertDialogProps) {
+export function AlertDialogDeleteTask() {
   const { taskApi } = useApi()
-  const { deleteTask, setCurrentTaskId } = useTaskStore()
+  const { deleteTask, setCurrentTaskId, setOpenModal, taskId } = useTaskStore()
   const navigate = useNavigate()
 
   if (!open) return null;
 
   async function handleDeleteTask() {
-    const { status } = await taskApi.deleteTask(id)
+    const { status } = await taskApi.deleteTask(taskId!)
     if (status === 204) {
-      deleteTask(id)
+      deleteTask(taskId!)
+      toast.success(`Tarefa excluida: ${taskId}`)
       setCurrentTaskId(null)
-      toast.success(`Tarefa excluida: ${id}`)
       navigate("/")
-      onOpenChange(false)
+      setOpenModal("delete", false)
     } else {
-      toast.error(`Impossível deletar tarefa: ${id}`)
+      toast.error(`Impossível deletar tarefa: ${taskId}`)
     }
   }
 
@@ -39,7 +34,7 @@ export function AlertDialogDeleteTask({ open, onOpenChange, id }: AlertDialogPro
 
         <div className="flex justify-end gap-2">
           <button
-            onClick={() => onOpenChange(false)}
+            onClick={() => setOpenModal("delete", false)}
             className="px-4 py-2 border rounded-md hover:bg-gray-100 transition"
           >
             Cancelar

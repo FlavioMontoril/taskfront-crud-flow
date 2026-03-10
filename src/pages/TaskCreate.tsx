@@ -28,7 +28,7 @@ export function TaskCreate() {
 
     const onSubmit = async (data: TaskCreateSchema) => {
         try {
-            const { status, _data } = await taskApi.createTask(data)
+            const {status, _data} = await taskApi.createTask(data)
             if (status === 201 && _data) {
                 addTask(_data)
                 toast.success("Tarefa criada com sucesso")

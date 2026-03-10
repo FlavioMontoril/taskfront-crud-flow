@@ -1,33 +1,37 @@
-import { useState } from "react";
 import { Flow } from "./ReactFlow";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
-import type { TaskModel } from "../model/taskModel";
 import { ReactFlowProvider } from "reactflow";
 import { TaskTable } from "../pages/Home";
-import type { FileResponse } from "../types/fileTypes";
-
+import { useTaskStore } from "../store/task-store";
+import { useFileStore } from "../store/file-store";
+import { useSocketListeners } from "../modules/useSocketListener";
 
 
 export function ResizableTask() {
-    const [selectedTask, setSelectedTask] = useState<TaskModel | null>(null);
-    const [selectedFile, setSelectedFile] = useState<FileResponse | null>(null);
+    const { isOpenFlow, task, setOpenModal } = useTaskStore()
+    const { upload } = useFileStore()
 
+    useSocketListeners();
 
     return (
         <ReactFlowProvider>
             <ResizablePanelGroup
                 direction="horizontal"
-                className="min-h-[200px] rounded-lg border md:min-w-[1000px] border-none"
+                className="min-h-[200px] rounded-lg border md:min-w-[1000px] border-none "
             >
-                <ResizablePanel defaultSize={selectedTask ? 20 : 100} className="px-2">
-                    <TaskTable onSelectTask={setSelectedTask} onSelectFile={setSelectedFile} />
+                <ResizablePanel defaultSize={isOpenFlow ? 20 : 100} className="px-2">
+                    <TaskTable />
                 </ResizablePanel>
                 <ResizableHandle withHandle />
-                {selectedTask && (
+                {isOpenFlow && (
 
-                    <ResizablePanel defaultSize={80} className="py-6">
+                    <ResizablePanel defaultSize={80} className="py-6 px-32">
                         <div className="flex h-full  items-center justify-center p-6">
-                            <Flow task={selectedTask} data={selectedFile!} onClose={() => setSelectedTask(null)}  />
+                            <Flow
+                                task={task!}
+                                data={upload!}
+                                onClose={() => setOpenModal("flow", false)}
+                            />
                         </div>
                     </ResizablePanel>
                 )}

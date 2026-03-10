@@ -19,5 +19,11 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      'react-hooks/exhaustive-deps': 'off',
+      // 👇 aqui você controla os avisos
+      '@typescript-eslint/no-explicit-any': 'off',  // desliga
+      // ou "warn" se quiser só aviso
+    },
   },
 ])
